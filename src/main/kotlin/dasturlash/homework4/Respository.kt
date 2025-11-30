@@ -53,14 +53,32 @@ class BaseRepositoryImpl<T : BaseEntity>(
 interface UserRepository : BaseRepository<User> {
     fun existsByUsername(username: String): Boolean
 
-    @Modifying
+    /*@Modifying
     @Transactional
     @Query("update User u set u.balance = u.balance - ?2" +
             " where u.balance >= ?2 and u.id = ?1")
-    fun deductBalance(userId: Long?, amount: BigDecimal)
+    fun deductBalance(userId: Long?, amount: BigDecimal)*/
 
-    @Query("select u from User u where u.id = ?1 and u.balance >= ?2")
-    fun checkBalance(userId: Long?, amount: BigDecimal): User?
+    /*@Query("select u from User u where u.id = ?1 and u.balance >= ?2")
+    fun checkBalance(userId: Long?, amount: BigDecimal): User?*/
+
+    @Query("select u from User u where u.username = ?1 and u.deleted = false" )
+    fun findByUsername(username: String?): User?
 }
 //User repo
 
+//Category repo
+@Repository
+interface CategoryRepository : BaseRepository<Category> {
+    fun findByName(name: String): Category?
+
+}
+
+@Repository
+interface ProductRepository : BaseRepository<Product>{
+
+    @Modifying
+    @Transactional
+    @Query("update Product p set p.stockCount = p.stockCount - ?2 where p.id = ?1 and p.stockCount >= ?2")
+    fun deductCount(productId: Long?, count: Long)
+}

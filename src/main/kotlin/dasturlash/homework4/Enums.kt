@@ -8,7 +8,7 @@ enum class PaymentMethod{
 }
 
 enum class UserRole{
-    ADMIN, USER
+    ROLE_ADMIN, ROLE_USER
 }
 
 enum class PaymentStatus{
@@ -21,7 +21,6 @@ enum class ErrorCode(val code: Int) {
     PRODUCT_NOT_FOUND(200),
     CATEGORY_NOT_FOUND(300),
     INSUFFICIENT_FUNDS(400),
-    TRANSACTION_NOT_FOUND(500),
-    NOT_PURCHASED(201)
+    USERNAME_NOT_FOUND(102),
 
 }

@@ -47,6 +47,11 @@ class UserNotFoundException() : ShopApp2Exception(){
     override fun errorType() = ErrorCode.USER_NOT_FOUND
 }
 
+class UsernameNotFoundException() : ShopApp2Exception(){
+    override fun errorType() = ErrorCode.USERNAME_NOT_FOUND
+
+}
+
 class UserAlreadyExistsException() : ShopApp2Exception(){
     override fun errorType() = ErrorCode.USERNAME_ALREADY_EXISTS
 }

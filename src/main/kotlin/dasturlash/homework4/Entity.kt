@@ -3,6 +3,8 @@ package dasturlash.homework4
 import jakarta.annotation.Generated
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -10,6 +12,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.MappedSuperclass
+import jakarta.persistence.Table
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
 import jakarta.persistence.criteria.CriteriaBuilder
@@ -22,7 +25,6 @@ import java.math.BigDecimal
 import java.util.Date
 
 @MappedSuperclass
-@Entity
 class BaseEntity(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) var id: Long? = null,
     @CreatedDate @Temporal(TemporalType.TIMESTAMP)var createdDate: Date? = null,
@@ -33,20 +35,23 @@ class BaseEntity(
     )
 
 @Entity
+@Table(name = "users")
 class User(
     var username: String,
     var fullname: String,
     var email: String,
+    var password: String,
     var address: String,
-    var role: UserRole
+    @Enumerated(EnumType.STRING) var role: UserRole
 ): BaseEntity()
 
 @Entity
+@Table(name = "orders")
 class Order(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     var user: User,
-    var status: OrderStatus,
+    @Enumerated(EnumType.STRING) var status: OrderStatus,
     var totalAmount: BigDecimal,
 ) : BaseEntity()
 
@@ -58,7 +63,7 @@ class Payment(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     var user: User,
-    var paymentMethod: PaymentMethod,
+    @Enumerated(EnumType.STRING) var paymentMethod: PaymentMethod,
     var amount: BigDecimal,
 ): BaseEntity()
 

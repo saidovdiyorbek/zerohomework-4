@@ -1,15 +1,13 @@
 package dasturlash.homework4
 
 import org.springframework.stereotype.Component
-import java.util.Date
-import kotlin.Long
 
 @Component
 class UserMapper {
 
-    fun toUserFullInfo(user: User): UserFullInfo {
+    fun toUserFullInfoAdmin(user: User): UserFullInfoAdmin {
         user.run {
-            return UserFullInfo(
+            return UserFullInfoAdmin(
                 id,
                 createdDate,
                 lastModifiedDate,
@@ -21,6 +19,35 @@ class UserMapper {
                 email,
                 address,
                 role,
+            )
+        }
+    }
+}
+
+@Component
+class CategoryMapper(){
+    fun toEntity(body: CategoryCreateRequest): Category {
+        body.run {
+            return Category(
+                name = name,
+                order = order,
+                description = description,
+            )
+        }
+    }
+
+    fun toCategoryFullInfo(body: Category): CategoryFullInfo {
+        body.run {
+            return CategoryFullInfo(
+                id,
+                createdDate,
+                lastModifiedDate,
+                createdBy,
+                lastModifiedBy,
+                deleted,
+                name,
+                order,
+                description
             )
         }
     }

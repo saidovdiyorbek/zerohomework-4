@@ -1,12 +1,13 @@
 package dasturlash.homework4
 
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
 interface UserService{
     fun create(userRequest: UserRequest)
-    fun getOne(id: Long): UserFullInfo
+    fun getOneAdmin(id: Long): UserFullInfoAdmin
     fun delete(id: Long)
-    fun getAll(): List<UserFullInfo>
+    fun getAllAdmin(): List<UserFullInfoAdmin>
     fun update(id: Long, updateBody: UpdateUserRequest)
 }
 
@@ -14,35 +15,43 @@ interface UserService{
 class UserServiceImpl(
     private val userRepository: UserRepository,
     private val mapper: UserMapper,
+    private val passwordEncoder: PasswordEncoder
 ) : UserService {
     override fun create(userRequest: UserRequest) {
-        if(userRepository.existsByUsername(userRequest.username)){
+        if (userRepository.existsByUsername(userRequest.username)) {
             throw UserAlreadyExistsException()
         }
 
-        userRepository.save(User(
-            fullname = userRequest.fullname,
-            username = userRequest.username,
-            role = UserRole.USER,
-            email = userRequest.email,
-            address = userRequest.address,))
+        userRepository.save(
+            User(
+                fullname = userRequest.fullname,
+                username = userRequest.username,
+                role = UserRole.ROLE_USER,
+                email = userRequest.email,
+                password = passwordEncoder.encode(userRequest.password),
+                address = userRequest.address,
+            )
+        )
     }
 
-    override fun getOne(id: Long): UserFullInfo {
+    override fun getOneAdmin(id: Long): UserFullInfoAdmin {
         return userRepository.findByIdAndDeletedFalse(id)?.let {
-            mapper.toUserFullInfo(it)
+            mapper.toUserFullInfoAdmin(it)
         } ?: throw UserNotFoundException()
     }
+
     override fun delete(id: Long) {
         userRepository.findByIdAndDeletedFalse(id) ?: throw UserNotFoundException()
         userRepository.trash(id)
     }
 
-    override fun getAll(): List<UserFullInfo> {
-        val responseUsers: MutableList<UserFullInfo> = mutableListOf()
+    override fun getAllAdmin(): List<UserFullInfoAdmin>{
+        val responseUsers: MutableList<UserFullInfoAdmin> = mutableListOf()
 
         userRepository.findAll().forEach {
-            responseUsers.add(UserFullInfo(it.fullname, it.username, it.balance, it.createdDate))
+            responseUsers.add(
+                mapper.toUserFullInfoAdmin(it)
+            )
         }
         return responseUsers
     }
@@ -50,30 +59,72 @@ class UserServiceImpl(
     override fun update(id: Long, updateBody: UpdateUserRequest) {
         updateBody.run {
             val user = userRepository.findByIdAndDeletedFalse(id) ?: throw UserNotFoundException()
+
             fullname?.let { user.fullname = it }
-            balance?.let { user.balance = it }
             username?.let { newUsername ->
                 userRepository.existsByUsername(newUsername)
             }
 
         }
     }
+}
+//user service
 
-    override fun getAllPayments(id: Long): List<UserPaymentTransactionResponse> {
-        userRepository.findById(id).getOrThrowNotFound(UserNotFoundException())
-        val userPaymentsByUserId = userPaymentRepository.getUserPaymentsByUserId(id)
-        val response: MutableList<UserPaymentTransactionResponse> = mutableListOf()
+//category service
+interface CategoryService{
+    fun create(request: CategoryCreateRequest)
+    fun getAll(): List<CategoryFullInfo>
+    fun getOne(id: Long): CategoryFullInfo
+    fun update(id: Long, updateBody: CategoryUpdateRequest)
+    fun delete(id: Long)
 
-        userPaymentsByUserId?.run {
-            for (payments in this) {
-                response.add(UserPaymentTransactionResponse(
-                    payments?.id,
-                    id,
-                    payments?.createdDate,
-                    payments?.amount
-                ))
+}
+
+@Service
+class CategoryServiceImpl(
+    private val repository: CategoryRepository,
+    private val mapper: CategoryMapper
+) : CategoryService {
+    override fun create(request: CategoryCreateRequest) {
+        request.run {
+            repository.findByName(name)?.let {
+                throw CategoryNotFoundException()
+            } ?: run {
+                repository.shiftOrderUp(this.order)
+                repository.save(mapper.toEntity(this))
             }
         }
-        return response;
+    }
+
+    override fun getAll(): List<CategoryFullInfo> {
+        val responses: MutableList<CategoryFullInfo> = mutableListOf()
+        repository.findAll().forEach { category ->
+            responses.add(mapper.toCategoryFullInfo(category))
+        }
+        return responses
+    }
+
+    override fun getOne(id: Long): CategoryFullInfo {
+        val category = repository.findByIdAndDeletedFalse(id) ?: throw CategoryNotFoundException()
+
+        return category.run {
+            mapper.toCategoryFullInfo(this)
+        }
+    }
+
+    override fun update(id: Long, updateBody: CategoryUpdateRequest) {
+        val category = repository.findByIdAndDeletedFalse(id) ?: throw CategoryNotFoundException()
+
+        repository.save(updateBody.run {
+            this.name?.let { category.name = name }
+            this.description?.let { category.description = description }
+            category
+        })
+    }
+
+    override fun delete(id: Long) {
+        repository.trash(id) ?: throw CategoryNotFoundException()
     }
 }
+//category service
+

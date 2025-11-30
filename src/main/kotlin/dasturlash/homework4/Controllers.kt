@@ -22,9 +22,9 @@ class UserController(
     @PostMapping
         fun create(@RequestBody userRequest: UserRequest) = userService.create(userRequest)
 
-    @Operation(summary = "Get one user by id")
+    @Operation(summary = "Get one user by id Admin")
     @GetMapping("/{id}")
-    fun getOne(@PathVariable id: Long): UserFullInfo = userService.getOne(id)
+    fun getOneAdmin(@PathVariable id: Long): UserFullInfoAdmin = userService.getOneAdmin(id)
 
     @Operation(summary = "Delete user bu id")
     @DeleteMapping("/{id}")
@@ -32,15 +32,39 @@ class UserController(
 
     @Operation(summary = "Get all users")
     @GetMapping
-    fun getAll(): List<UserFullInfo> = userService.getAll()
+    fun getAll(): List<UserFullInfoAdmin> = userService.getAllAdmin()
 
     @Operation(summary = "Update user by id")
     @PutMapping("/{id}")
     fun update(@PathVariable id: Long, @RequestBody updateBody: UpdateUserRequest) =
         userService.update(id, updateBody)
 
-    @Operation(summary = "Get user all payments")
-    @PostMapping("/{id}")
-    fun getUserAllPayments(@PathVariable id: Long): List<UserPaymentTransactionResponse> =
-        userService.getAllPayments(id)
+}
+
+//category controller
+@RestController
+@RequestMapping("/api/category")
+class CategoryController(
+    private val categoryService: CategoryService
+){
+
+    @Operation(summary = "Create category")
+    @PostMapping
+    fun create(@RequestBody request: CategoryCreateRequest) = categoryService.create(request)
+
+    @Operation(summary = "Get all categories")
+    @GetMapping
+    fun getAll(): List<CategoryFullInfo> = categoryService.getAll()
+
+    @Operation(summary = "Get one by id")
+    @GetMapping("/{id}")
+    fun getOne(@PathVariable id: Long): CategoryFullInfo = categoryService.getOne(id)
+
+    @Operation(summary = "Update by id and body")
+    @PutMapping("/{id}")
+    fun update(@PathVariable id: Long, @RequestBody updateBody: CategoryUpdateRequest) = categoryService.update(id, updateBody)
+
+    @Operation(summary = "Delete by id")
+    @DeleteMapping("/{id}")
+    fun delete(@PathVariable id: Long) = categoryService.delete(id)
 }
