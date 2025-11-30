@@ -2,6 +2,7 @@ package dasturlash.homework4
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.core.userdetails.UserDetails
@@ -19,8 +20,7 @@ class SecurityConfig(
 ) {
 
     @Bean
-    fun securityFilterChain(http: HttpSecurity,
-                            userDetailsService: UserDetailsService): SecurityFilterChain {
+    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .csrf { it.disable() }
             .authorizeHttpRequests { auth ->
@@ -35,8 +35,10 @@ class SecurityConfig(
                     ).permitAll()
 
 
-                    .requestMatchers("/api/users/").hasRole("USER")
 
+
+                    .requestMatchers(HttpMethod.POST,"/api/category/", "/api/products").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.PUT,"/api/category/", "/api/products").hasRole("ADMIN")
                     .requestMatchers("/api/users/*").hasRole("ADMIN")
 
                     .anyRequest().authenticated()

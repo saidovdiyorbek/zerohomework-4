@@ -2,6 +2,7 @@ package dasturlash.homework4
 
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import kotlin.text.category
 
 interface UserService{
     fun create(userRequest: UserRequest)
@@ -90,7 +91,6 @@ class CategoryServiceImpl(
             repository.findByName(name)?.let {
                 throw CategoryNotFoundException()
             } ?: run {
-                repository.shiftOrderUp(this.order)
                 repository.save(mapper.toEntity(this))
             }
         }
@@ -128,3 +128,65 @@ class CategoryServiceImpl(
 }
 //category service
 
+//Product service
+interface ProductService{
+    fun create(request: ProductCreateRequest): Any
+    fun getAll(): List<ProductFullInfo>
+    fun getOne(id: Long): ProductFullInfo
+    fun update(id: Long, updateBody: ProductUpdateRequest)
+    fun delete(id: Long)
+}
+@Service
+class ProductServiceImpl(
+    private val categoryRepository: CategoryRepository,
+    private val repository: ProductRepository,
+    private val mapper: ProductMapper,
+) : ProductService {
+
+    override fun create(request: ProductCreateRequest){
+        request.run {
+            val category = categoryRepository.findByIdAndDeletedFalse(request.categoryId) ?:
+            throw CategoryNotFoundException()
+            repository.save(mapper.toEntity(request, category))
+        }
+    }
+
+    override fun getAll(): List<ProductFullInfo> {
+        val response: MutableList<ProductFullInfo> = mutableListOf()
+        repository.findAll().forEach {product ->
+            mapper.toProductFullInfo(product).run {
+                response.add(this)
+            }
+        }
+        return response
+    }
+
+    override fun getOne(id: Long): ProductFullInfo {
+        val product = repository.findByIdAndDeletedFalse(id) ?: throw ProductNotFoundException()
+
+        return product.run {
+            mapper.toProductFullInfo(product)
+        }
+
+    }
+
+    override fun update(id: Long, updateBody: ProductUpdateRequest) {
+        val product = repository.findByIdAndDeletedFalse(id) ?: throw ProductNotFoundException()
+        updateBody.run {
+            this.categoryId?.let {
+                val category =  categoryRepository.findByIdAndDeletedFalse(this.categoryId) ?: throw CategoryNotFoundException()
+                product.category = category
+            }
+            this.name?.let { product.name = name}
+            this.stockCount?.let { product.stockCount = stockCount}
+            this.prince?.let { product.price = prince}
+        }
+        repository.save(product)
+    }
+
+    override fun delete(id: Long) {
+        repository.trash(id) ?: throw ProductNotFoundException()
+    }
+
+}
+//Product service

@@ -62,7 +62,6 @@ data class CategoryFullInfo(
     val lastModifiedBy: String?,
     val deleted: Boolean?,
     val name: String?,
-    val order: Long?,
     val description: String?
 )
 
@@ -74,7 +73,8 @@ data class CategoryUpdateRequest(
 
 data class ProductCreateRequest(
     val name: String,
-    val count: Long,
+    val description: String,
+    val stockCount: Int,
     val categoryId: Long,
     val prince: BigDecimal
 )
@@ -87,14 +87,14 @@ data class ProductFullInfo(
     val lastModifiedBy: String?,
     val deleted: Boolean?,
     val name: String?,
-    val count: Long?,
+    val stockCount: Int?,
     val categoryId: Long?,
     var price: BigDecimal?,
 )
 
 data class ProductUpdateRequest(
     val name: String?,
-    val count: Long?,
+    val stockCount: Int?,
     val categoryId: Long?,
     val prince: BigDecimal?,
 )

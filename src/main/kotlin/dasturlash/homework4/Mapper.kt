@@ -1,6 +1,7 @@
 package dasturlash.homework4
 
 import org.springframework.stereotype.Component
+import kotlin.text.category
 
 @Component
 class UserMapper {
@@ -30,7 +31,6 @@ class CategoryMapper(){
         body.run {
             return Category(
                 name = name,
-                order = order,
                 description = description,
             )
         }
@@ -46,8 +46,41 @@ class CategoryMapper(){
                 lastModifiedBy,
                 deleted,
                 name,
-                order,
                 description
+            )
+        }
+    }
+}
+
+@Component
+class ProductMapper(
+
+){
+    fun toEntity(body: ProductCreateRequest, category: Category): Product {
+        body.run {
+            return Product(
+                name = name,
+                description = description,
+                stockCount = stockCount,
+                category = category,
+                price = prince
+            )
+        }
+    }
+
+    fun toProductFullInfo(body: Product): ProductFullInfo {
+        body.run {
+            return ProductFullInfo(
+                id,
+                createdDate,
+                lastModifiedDate,
+                createdBy,
+                lastModifiedBy,
+                deleted,
+                name,
+                stockCount,
+                category?.id,
+                price
             )
         }
     }

@@ -68,3 +68,30 @@ class CategoryController(
     @DeleteMapping("/{id}")
     fun delete(@PathVariable id: Long) = categoryService.delete(id)
 }
+
+@RestController
+@RequestMapping("/api/products")
+class ProductController(
+    private val productService: ProductService
+){
+
+    @Operation(summary = "Create product")
+    @PostMapping
+    fun create(@RequestBody request: ProductCreateRequest) = productService.create(request)
+
+    @Operation(summary = "Get all products")
+    @GetMapping
+    fun getAll(): List<ProductFullInfo> = productService.getAll()
+
+    @Operation(summary = "Get one by id")
+    @GetMapping("/{id}")
+    fun getOne(@PathVariable id: Long): ProductFullInfo = productService.getOne(id)
+
+    @Operation(summary = "Update by id and body")
+    @PutMapping("/{id}")
+    fun update(@PathVariable id: Long, @RequestBody updateBody: ProductUpdateRequest) = productService.update(id, updateBody)
+
+    @Operation(summary = "Delete by id")
+    @DeleteMapping("/{id}")
+    fun delete(@PathVariable id: Long) = productService.delete(id)
+}
