@@ -69,3 +69,7 @@ class InsufficientFundsException() : ShopApp2Exception(){
     override fun errorType() = ErrorCode.INSUFFICIENT_FUNDS
 
 }
+
+class UserNotAuthenticatedException() : ShopApp2Exception(){
+    override fun errorType() =  ErrorCode.USER_NOT_AUTHENTICATED
+}

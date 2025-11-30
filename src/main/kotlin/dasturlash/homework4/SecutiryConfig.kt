@@ -3,6 +3,8 @@ package dasturlash.homework4
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
+import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.core.userdetails.UserDetails
@@ -16,15 +18,17 @@ import org.springframework.security.web.SecurityFilterChain
 @Configuration
 @EnableWebSecurity
 class SecurityConfig(
-    private val customUserDetailsService: CustomUserDetailsService
+    //private val customUserDetailsService: CustomUserDetailsService
 ) {
 
     @Bean
-    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
+    fun securityFilterChain(http: HttpSecurity,
+                            customUserDetailsService: CustomUserDetailsService): SecurityFilterChain {
         http
             .csrf { it.disable() }
             .authorizeHttpRequests { auth ->
                 auth
+                    .requestMatchers("/api/auth/**").permitAll()
                     .requestMatchers(
                         "/swagger-ui/**",
                         "/swagger-ui.html",
@@ -34,6 +38,7 @@ class SecurityConfig(
                         "/webjars/**"
                     ).permitAll()
 
+                    .requestMatchers("/api/orders/**").hasRole("USER")
 
 
 
@@ -52,5 +57,10 @@ class SecurityConfig(
     @Bean
     fun passwordEncoder(): PasswordEncoder {
         return BCryptPasswordEncoder()
+    }
+
+    @Bean
+    fun authenticationManager(authenticationConfiguration: AuthenticationConfiguration): AuthenticationManager {
+        return authenticationConfiguration.authenticationManager
     }
 }

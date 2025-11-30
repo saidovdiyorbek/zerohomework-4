@@ -7,12 +7,15 @@ import org.springframework.context.MessageSource
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.support.ResourceBundleMessageSource
+import org.springframework.data.domain.AuditorAware
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.servlet.AsyncHandlerInterceptor
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import org.springframework.web.servlet.i18n.SessionLocaleResolver
 import org.springframework.web.servlet.support.RequestContextUtils
 import java.util.Locale
+import java.util.Optional
 
 @Configuration
 class WebMvcConfig : WebMvcConfigurer {
@@ -44,5 +47,18 @@ class WebMvcConfig : WebMvcConfigurer {
                 return true
             }
         })
+    }
+}
+
+@Configuration
+class AuditConfig{
+
+    @Bean
+    fun auditorAware(): AuditorAware<String> {
+        return AuditorAware {
+            Optional.ofNullable(
+                SecurityContextHolder.getContext().authentication.name ?: "system"
+            )
+        }
     }
 }

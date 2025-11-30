@@ -1,6 +1,8 @@
 package dasturlash.homework4
 
 import io.swagger.v3.oas.annotations.Operation
+import jakarta.servlet.http.HttpServletRequest
+import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -9,6 +11,18 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+
+@RestController
+@RequestMapping("/api/auth")
+class AuthController(
+    private val authService: AuthService,
+    private val authenticationManager: AuthenticationManager
+) {
+
+    @PostMapping("/login")
+    fun login(@RequestBody loginRequest: LoginRequest, request: HttpServletRequest) =
+        authService.login(loginRequest, request)
+}
 
 @RestController
 @RequestMapping("/api/users")
@@ -94,4 +108,14 @@ class ProductController(
     @Operation(summary = "Delete by id")
     @DeleteMapping("/{id}")
     fun delete(@PathVariable id: Long) = productService.delete(id)
+}
+
+@RestController
+@RequestMapping("/api/orders")
+class OrderController(
+    private val orderService: OrderService
+){
+    @Operation(summary = "Create order")
+    @PostMapping
+    fun create(@RequestBody orderRequest: OrderCreateRequest) = orderService.create(orderRequest)
 }

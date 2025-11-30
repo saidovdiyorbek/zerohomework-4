@@ -1,9 +1,47 @@
 package dasturlash.homework4
 
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.transaction.Transactional
+import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
+import kotlin.math.log
 import kotlin.text.category
 
+//auth service
+interface AuthService {
+    fun login(loginRequest: LoginRequest, request: HttpServletRequest): BaseMessage
+
+}
+@Service
+class AuthServiceImpl(
+    private val authenticationManager: AuthenticationManager,
+    private val customUserDetailsService: CustomUserDetailsService
+) : AuthService {
+    override fun login(loginRequest: LoginRequest, request: HttpServletRequest): BaseMessage {
+
+
+        val userDetails: UserDetails? = customUserDetailsService.loadUserByUsername(loginRequest.username)
+
+        val authentication =  authenticationManager.authenticate(
+            UsernamePasswordAuthenticationToken(
+                loginRequest.username,
+                loginRequest.password)
+            )
+
+        SecurityContextHolder.getContext().authentication = authentication
+        println(SecurityContextHolder.getContext().authentication.name)
+        return BaseMessage.OK
+    }
+
+}
+//auth service
+
+//user service
 interface UserService{
     fun create(userRequest: UserRequest)
     fun getOneAdmin(id: Long): UserFullInfoAdmin
@@ -30,6 +68,7 @@ class UserServiceImpl(
                 role = UserRole.ROLE_USER,
                 email = userRequest.email,
                 password = passwordEncoder.encode(userRequest.password),
+                status = UserStatus.ACTIVE,
                 address = userRequest.address,
             )
         )
@@ -190,3 +229,72 @@ class ProductServiceImpl(
 
 }
 //Product service
+
+//Order service
+interface OrderService{
+    fun create(orderRequest: OrderCreateRequest)
+}
+
+@Service
+class OrderServiceImpl(
+    private val repository: OrderRepository,
+    private val orderItemRepository: OrderItemRepository,
+    private val paymentRepository: PaymentRepository,
+    private val productRepository: ProductRepository,
+    private val userRepository: UserRepository,
+    private val sessionUser: SecurityUtils,
+) : OrderService {
+    @Transactional
+    override fun create(orderRequest: OrderCreateRequest) {
+
+
+        val user = userRepository.findByIdAndDeletedFalse(sessionUser.getCurrentUserId()) ?: throw UserNotFoundException()
+        var saveOrder: Order? = null
+
+        var orderItemsCreation: MutableList<OrderItem> = mutableListOf()
+        var calculatedTotalAmount = BigDecimal.ZERO
+        var create: Boolean = false
+        var forCount = 1
+        orderRequest.orderItems.forEach { item ->
+
+            val product = productRepository.findByIdAndDeletedFalse(item.productId)
+                    ?: throw ProductNotFoundException()
+            val itemAmountTotal = product.price.multiply(BigDecimal(item.quantity))
+            calculatedTotalAmount = calculatedTotalAmount.add(itemAmountTotal)
+            forCount++
+
+            if (create){
+                saveOrder = repository.save(Order(
+                    user = user,
+                    status = OrderStatus.PENDING,
+                    totalAmount = calculatedTotalAmount,
+                ))
+            }
+
+            if (create){
+                orderRequest.orderItems.forEach { item ->
+                    orderItemsCreation.add(OrderItem(
+                        order = saveOrder,
+                        product = product,
+                        item.quantity,
+                        product.price,
+                        itemAmountTotal
+                    ))
+                }
+                orderItemRepository.saveAll(orderItemsCreation)
+            }
+
+            if (forCount == orderRequest.orderItems.size) {
+                create = true
+            }
+        }
+        paymentRepository.save(Payment(
+            order = saveOrder,
+            user = user,
+            paymentMethod = orderRequest.payment.paymentMethod,
+            amount = calculatedTotalAmount,
+        ))
+
+    }
+}
+//Order service

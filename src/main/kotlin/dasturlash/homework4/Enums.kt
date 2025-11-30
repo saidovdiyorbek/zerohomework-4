@@ -11,6 +11,10 @@ enum class UserRole{
     ROLE_ADMIN, ROLE_USER
 }
 
+enum class UserStatus{
+    ACTIVE, INACTIVE
+}
+
 enum class PaymentStatus{
     FINISHED, CANCELLED, IN_PROGRESS
 }
@@ -22,5 +26,5 @@ enum class ErrorCode(val code: Int) {
     CATEGORY_NOT_FOUND(300),
     INSUFFICIENT_FUNDS(400),
     USERNAME_NOT_FOUND(102),
-
+    USER_NOT_AUTHENTICATED(103)
 }

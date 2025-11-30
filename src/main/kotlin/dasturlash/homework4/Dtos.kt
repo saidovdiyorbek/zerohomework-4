@@ -1,5 +1,10 @@
 package dasturlash.homework4
 
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
 import java.math.BigDecimal
 import java.util.Date
 
@@ -50,7 +55,6 @@ data class UserInfo(
 
 data class CategoryCreateRequest(
     val name: String,
-    val order: Long,
     val description: String,
 )
 
@@ -97,4 +101,25 @@ data class ProductUpdateRequest(
     val stockCount: Int?,
     val categoryId: Long?,
     val prince: BigDecimal?,
+)
+
+data class LoginRequest(
+    val username: String,
+    val password: String
+)
+
+data class OrderCreateRequest(
+    var status: OrderStatus,
+    var orderItems: List<OrderItemCreate>,
+    var payment: PaymentCreate
+)
+
+data class OrderItemCreate(
+    val productId: Long,
+    val quantity: Int,
+)
+
+data class PaymentCreate(
+    val userId: Long,
+    val paymentMethod: PaymentMethod,
 )

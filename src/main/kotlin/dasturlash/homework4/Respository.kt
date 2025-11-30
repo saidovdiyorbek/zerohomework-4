@@ -82,3 +82,14 @@ interface ProductRepository : BaseRepository<Product>{
     @Query("update Product p set p.stockCount = p.stockCount - ?2 where p.id = ?1 and p.stockCount >= ?2")
     fun deductCount(productId: Long?, count: Long)
 }
+
+@Repository
+interface OrderRepository : BaseRepository<Order> {
+
+}
+
+@Repository
+interface OrderItemRepository : BaseRepository<OrderItem>{}
+
+@Repository
+interface PaymentRepository : BaseRepository<Payment> {}

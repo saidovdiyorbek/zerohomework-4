@@ -42,7 +42,8 @@ class User(
     var email: String,
     var password: String,
     var address: String,
-    @Enumerated(EnumType.STRING) var role: UserRole
+    @Enumerated(EnumType.STRING) var role: UserRole,
+    @Enumerated(EnumType.STRING) var status: UserStatus,
 ): BaseEntity()
 
 @Entity
@@ -59,7 +60,7 @@ class Order(
 class Payment(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
-    var order: Order,
+    var order: Order?,
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     var user: User,
@@ -88,7 +89,7 @@ class Product(
 class OrderItem(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
-    var order: Order,
+    var order: Order?,
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     var product: Product,
