@@ -9,8 +9,6 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
-import kotlin.math.log
-import kotlin.text.category
 
 //auth service
 interface AuthService {
@@ -252,32 +250,35 @@ class OrderServiceImpl(
         var saveOrder: Order? = null
 
         var orderItemsCreation: MutableList<OrderItem> = mutableListOf()
-        var calculatedTotalAmount = BigDecimal.ZERO
+        var calculatedTotalAmountForOrder = BigDecimal.ZERO
         var create: Boolean = false
         var forCount = 1
         orderRequest.orderItems.forEach { item ->
 
             val product = productRepository.findByIdAndDeletedFalse(item.productId)
                     ?: throw ProductNotFoundException()
-            val itemAmountTotal = product.price.multiply(BigDecimal(item.quantity))
-            calculatedTotalAmount = calculatedTotalAmount.add(itemAmountTotal)
+            val itemAmountTotalForOrder = product.price.multiply(BigDecimal(item.quantity))
+            calculatedTotalAmountForOrder = calculatedTotalAmountForOrder.add(itemAmountTotalForOrder)
             forCount++
 
             if (create){
                 saveOrder = repository.save(Order(
                     user = user,
                     status = OrderStatus.PENDING,
-                    totalAmount = calculatedTotalAmount,
+                    totalAmount = calculatedTotalAmountForOrder,
                 ))
             }
 
             if (create){
                 orderRequest.orderItems.forEach { item ->
+                    val productForPrice = productRepository.findById(item.productId).get()
+                    val itemAmountTotal = productForPrice.price.multiply(BigDecimal(item.quantity))
+
                     orderItemsCreation.add(OrderItem(
                         order = saveOrder,
                         product = product,
                         item.quantity,
-                        product.price,
+                        productForPrice.price,
                         itemAmountTotal
                     ))
                 }
@@ -292,7 +293,7 @@ class OrderServiceImpl(
             order = saveOrder,
             user = user,
             paymentMethod = orderRequest.payment.paymentMethod,
-            amount = calculatedTotalAmount,
+            amount = calculatedTotalAmountForOrder,
         ))
 
     }
