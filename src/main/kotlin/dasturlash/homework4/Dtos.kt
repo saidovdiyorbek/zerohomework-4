@@ -80,7 +80,7 @@ data class ProductCreateRequest(
     val description: String,
     val stockCount: Int,
     val categoryId: Long,
-    val prince: BigDecimal
+    val prince: BigDecimal,
 )
 
 data class ProductFullInfo(
@@ -120,6 +120,20 @@ data class OrderItemCreate(
 )
 
 data class PaymentCreate(
-    val userId: Long,
     val paymentMethod: PaymentMethod,
+)
+
+data class OrderInfoResponse(
+    val userId: Long,
+    val totalAmount: BigDecimal,
+    val status: OrderStatus,
+    val items: List<OrderItemInfoResponse>,
+)
+
+data class OrderItemInfoResponse(
+    val orderId: Long,
+    val productId: Long,
+    val quantity: Int,
+    val unitPrice: BigDecimal,
+    val totalAmount: BigDecimal,
 )
