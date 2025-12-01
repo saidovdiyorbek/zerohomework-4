@@ -124,16 +124,41 @@ data class PaymentCreate(
 )
 
 data class OrderInfoResponse(
-    val userId: Long,
+    val username: String,
     val totalAmount: BigDecimal,
     val status: OrderStatus,
-    val items: List<OrderItemInfoResponse>,
+    val items: List<OrderItemInfoResponse>? = null,
 )
 
 data class OrderItemInfoResponse(
-    val orderId: Long,
-    val productId: Long,
+    val orderId: Long?,
+    val productId: Long?,
     val quantity: Int,
     val unitPrice: BigDecimal,
     val totalAmount: BigDecimal,
+)
+
+class OrderStatusBody(
+    val orderStatus: OrderStatus,
+)
+
+class OrderResponse(
+    val username: String,
+    val totalAmount: BigDecimal,
+)
+
+class PaymentResponse(
+    val orderId: Long?,
+    val userId: Long?,
+    val amount: BigDecimal,
+)
+class OrderCountUser(
+    val counts: Int?,
+    val totalAmountMonthly: BigDecimal?,
+)
+
+class OrderCalculatedResponse(
+    val productName: String?,
+    val totalOrdered: Int?,
+    val totalAmount: BigDecimal?,
 )

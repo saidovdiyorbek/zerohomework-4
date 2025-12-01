@@ -2,6 +2,7 @@ package dasturlash.homework4
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.transaction.Transactional
+import org.aspectj.weaver.ast.Or
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
@@ -9,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.time.LocalDate
 
 //auth service
 interface AuthService {
@@ -231,6 +233,12 @@ class ProductServiceImpl(
 //Order service
 interface OrderService{
     fun create(orderRequest: OrderCreateRequest)
+    fun getOne(orderId: Long): Any
+    fun updateStatusCancelled(orderId: Long)
+    fun updateStatusAdmin(orderId: Long, status: OrderStatusBody)
+    fun getAllUserOrders(): List<OrderResponse>
+    fun orderCountUser(month: Byte): OrderCountUser?
+    fun getUserOrdersCalculatedWithDate(startDate: LocalDate, endDate: LocalDate): OrderCalculatedResponse?
 }
 
 @Service
@@ -240,13 +248,15 @@ class OrderServiceImpl(
     private val paymentRepository: PaymentRepository,
     private val productRepository: ProductRepository,
     private val userRepository: UserRepository,
-    private val sessionUser: SecurityUtils,
+    private val securityUtils: SecurityUtils,
+    private val orderItemMapper: OrderItemMapper,
+    private val mapper: OrderMapper,
 ) : OrderService {
     @Transactional
     override fun create(orderRequest: OrderCreateRequest) {
 
 
-        val user = userRepository.findByIdAndDeletedFalse(sessionUser.getCurrentUserId()) ?: throw UserNotFoundException()
+        val user = userRepository.findByIdAndDeletedFalse(securityUtils.getCurrentUserId()) ?: throw UserNotFoundException()
         var saveOrder: Order? = null
 
         var orderItemsCreation: MutableList<OrderItem> = mutableListOf()
@@ -276,7 +286,7 @@ class OrderServiceImpl(
 
                     orderItemsCreation.add(OrderItem(
                         order = saveOrder,
-                        product = product,
+                        product = productForPrice,
                         item.quantity,
                         productForPrice.price,
                         itemAmountTotal
@@ -297,5 +307,102 @@ class OrderServiceImpl(
         ))
 
     }
+
+    override fun getOne(orderId: Long): Any {
+        val currentUserId = securityUtils.getCurrentUserId()
+        val responseItems: MutableList<OrderItemInfoResponse> = mutableListOf()
+        repository.findByUserIdAndIdProjection(currentUserId, orderId)?.let { order ->
+            val findAllByOrderId = orderItemRepository.findAllByOrderId(orderId)
+
+            findAllByOrderId.forEach {item ->
+                responseItems.add(orderItemMapper.toOrderItemInfoResponse(item))
+            }
+
+            return OrderInfoResponse(
+                order.getUsername(),
+                order.getTotalAmount(),
+                order.getStatus(),
+                responseItems
+            )
+        }
+        return responseItems
+    }
+
+    override fun updateStatusCancelled(orderId: Long) {
+        repository.findByUserIdAndId(securityUtils.getCurrentUserId(), orderId)?.let { order ->
+            order.status = OrderStatus.CANCELLED
+            repository.save(order)
+        }
+    }
+
+    override fun updateStatusAdmin(orderId: Long, status: OrderStatusBody) {
+        repository.findByIdAndDeletedFalse(orderId).let {order ->
+            order ?: throw OrderNotFoundException()
+            if (status.orderStatus == OrderStatus.CANCELLED){
+                throw AccessDeniedException()
+            }
+            order.status = status.orderStatus
+            repository.save(order)
+        }
+    }
+
+    override fun getAllUserOrders(): List<OrderResponse> {
+        val findById = userRepository.findById(securityUtils.getCurrentUserId()).get()
+        val responses: MutableList<OrderResponse> = mutableListOf()
+
+        repository.findAllByUserId(securityUtils.getCurrentUserId()).run {
+            this.forEach { order ->
+                responses.add(mapper.toOrderResponse(order, findById.username))
+            }
+        }
+        return responses
+    }
+
+    override fun orderCountUser(month: Byte): OrderCountUser? {
+        repository.findUserMonthlyOrdered(securityUtils.getCurrentUserId(), month)?.run {
+            return OrderCountUser(
+                getCounts(),
+                getTotalAmountMonthly()
+            )
+        }
+        return OrderCountUser(
+            counts = 0,
+            totalAmountMonthly = BigDecimal.ZERO,
+        )
+    }
+
+    override fun getUserOrdersCalculatedWithDate(
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): OrderCalculatedResponse? {
+        TODO("Not yet implemented")
+    }
 }
 //Order service
+
+//Payment service
+interface PaymentService {
+    fun getUserPayments(): List<PaymentResponse>
+}
+
+@Service
+class PaymentServiceImpl(
+    private val repository: PaymentRepository,
+    private val securityUtils: SecurityUtils,
+) : PaymentService {
+    override fun getUserPayments(): List<PaymentResponse> {
+        val responses: MutableList<PaymentResponse> = mutableListOf()
+        val findPayments = repository.findByUserIdAndDeletedFalse(securityUtils.getCurrentUserId())
+
+        findPayments?.forEach { payment ->
+            responses.add(PaymentResponse(
+                orderId = payment.order?.id,
+                userId = payment.user.id,
+                amount = payment.amount,
+            ))
+        }
+        return responses
+    }
+
+}
+//Payment service

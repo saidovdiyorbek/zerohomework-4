@@ -1,5 +1,6 @@
 package dasturlash.homework4
 
+import dasturlash.homework4.OrderNotFoundException
 import org.springframework.context.MessageSource
 import org.springframework.context.NoSuchMessageException
 import org.springframework.context.i18n.LocaleContextHolder
@@ -72,4 +73,14 @@ class InsufficientFundsException() : ShopApp2Exception(){
 
 class UserNotAuthenticatedException() : ShopApp2Exception(){
     override fun errorType() =  ErrorCode.USER_NOT_AUTHENTICATED
+}
+
+class OrderNotFoundException() : ShopApp2Exception(){
+    override fun errorType() = ErrorCode.ORDER_NOT_FOUND
+
+}
+
+class AccessDeniedException() : ShopApp2Exception(){
+    override fun errorType() =  ErrorCode.ACCESS_DENIED
+
 }

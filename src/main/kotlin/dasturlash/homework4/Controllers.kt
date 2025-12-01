@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 
 @RestController
 @RequestMapping("/api/auth")
@@ -118,4 +120,43 @@ class OrderController(
     @Operation(summary = "Create order")
     @PostMapping
     fun create(@RequestBody orderRequest: OrderCreateRequest) = orderService.create(orderRequest)
+
+    @Operation(summary = "Get one order himself")
+    @GetMapping("/{orderId}")
+    fun getOne(@PathVariable orderId: Long): Any = orderService.getOne(orderId)
+
+    @Operation(summary = "Cancelled order by id himself")
+    @PutMapping("/{orderId}")
+    fun updateStatusCancelled(@PathVariable orderId: Long) =
+        orderService.updateStatusCancelled(orderId)
+
+    @Operation(summary = "Update any order status admin by id")
+    @PutMapping("/update-status-admin/{orderId}")
+    fun updateStatusAdmin(@PathVariable orderId: Long, @RequestBody statusBody: OrderStatusBody) = orderService.updateStatusAdmin(orderId, statusBody)
+
+    @Operation(summary = "Get all user orders")
+    @GetMapping
+    fun getAllUserOrders(): List<OrderResponse> = orderService.getAllUserOrders()
+
+    @Operation(summary = "Get orders count of month user")
+    @GetMapping("/get-orders-month")
+    fun getOrdersCountMonth(@RequestParam(required = true) month: Byte): OrderCountUser? = orderService.orderCountUser(month)
+
+    @Operation(summary = "Get user orders calculated between give date")
+    @GetMapping("/get-user-orders-calculated-with-date")
+    fun getUserOrdersCalculatedWithDate(
+        @RequestParam(required = true) startDate: LocalDate,
+        @RequestParam endDate: LocalDate
+    ): OrderCalculatedResponse? = orderService.getUserOrdersCalculatedWithDate(startDate, endDate)
+}
+
+@RestController
+@RequestMapping("/api/payments")
+class PaymentController(
+    private val service: PaymentService,
+){
+
+    @Operation(summary = "Get user all payments")
+    @GetMapping("/get-user-payments")
+    fun getUserPayments(): List<PaymentResponse> = service.getUserPayments()
 }

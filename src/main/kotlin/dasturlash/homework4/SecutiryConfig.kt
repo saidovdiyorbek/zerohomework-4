@@ -21,6 +21,20 @@ class SecurityConfig(
     //private val customUserDetailsService: CustomUserDetailsService
 ) {
 
+    companion object{
+        @JvmStatic
+        val swaggerPaths = arrayOf( "/v2/api-docs",
+            "/v3/api-docs",
+            "/v3/api-docs/",
+            "/swagger-resources",
+            "/swagger-resources/",
+            "/configuration/ui",
+            "/configuration/security",
+            "/swagger-ui/",
+            "/webjars/",
+            "/swagger-ui.html")
+    }
+
     @Bean
     fun securityFilterChain(http: HttpSecurity,
                             customUserDetailsService: CustomUserDetailsService): SecurityFilterChain {
@@ -29,19 +43,12 @@ class SecurityConfig(
             .authorizeHttpRequests { auth ->
                 auth
                     .requestMatchers("/api/auth/**").permitAll()
-                    .requestMatchers(
-                        "/swagger-ui/**",
-                        "/swagger-ui.html",
-                        "/swagger-ui/index.html",
-                        "/v3/api-docs/**",
-                        "/v3/api-docs.yaml",
-                        "/webjars/**"
-                    ).permitAll()
+                    .requestMatchers(*SecurityConstants.AUTH_WHITELIST).permitAll()
 
-                    .requestMatchers("/api/orders/**").hasRole("USER")
+                    .requestMatchers("/api/orders/**").authenticated()
 
 
-
+                    .requestMatchers("/api/orders/update-status-admin/").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.POST,"/api/category/", "/api/products").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.PUT,"/api/category/", "/api/products").hasRole("ADMIN")
                     .requestMatchers("/api/users/*").hasRole("ADMIN")
@@ -62,5 +69,25 @@ class SecurityConfig(
     @Bean
     fun authenticationManager(authenticationConfiguration: AuthenticationConfiguration): AuthenticationManager {
         return authenticationConfiguration.authenticationManager
+    }
+}
+
+// SecurityConstants.kt fayli
+class SecurityConstants {
+    companion object {
+        // JvmStatic massivga Java usulida kirishni ta'minlaydi
+        @JvmStatic
+        val AUTH_WHITELIST = arrayOf(
+            "/v2/api-docs",
+            "/v3/api-docs",
+            "/v3/api-docs/",
+            "/swagger-resources",
+            "/swagger-resources/",
+            "/configuration/ui",
+            "/configuration/security",
+            "/swagger-ui/",
+            "/webjars/",
+            "/swagger-ui.html"
+        )
     }
 }

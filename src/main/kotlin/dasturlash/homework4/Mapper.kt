@@ -1,6 +1,7 @@
 package dasturlash.homework4
 
 import org.springframework.stereotype.Component
+import java.math.BigDecimal
 import kotlin.text.category
 
 @Component
@@ -85,3 +86,43 @@ class ProductMapper(
         }
     }
 }
+
+@Component
+class  OrderItemMapper(){
+
+    fun toOrderItemInfoResponse(body: OrderItem): OrderItemInfoResponse {
+        body.run {
+            return OrderItemInfoResponse(
+                order?.id,
+                product.id,
+                quantity,
+                unitPrice,
+                totalAmount
+            )
+        }
+    }
+}
+
+@Component
+class OrderMapper(){
+    fun toOrderResponse(body: Order, username: String): OrderResponse {
+        body.run {
+            return OrderResponse(
+                username = username,
+                totalAmount =  body.totalAmount
+            )
+        }
+    }
+}
+//Projections
+interface OrderInfoResponseProjection{
+    fun getUsername(): String
+    fun getTotalAmount(): BigDecimal
+    fun getStatus(): OrderStatus
+}
+
+interface OrderCountMonthlyProjection{
+    fun getCounts(): Int
+    fun getTotalAmountMonthly(): BigDecimal
+}
+//Projections

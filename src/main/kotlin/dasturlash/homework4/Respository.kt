@@ -86,10 +86,45 @@ interface ProductRepository : BaseRepository<Product>{
 @Repository
 interface OrderRepository : BaseRepository<Order> {
 
+    @Query("""
+        select o 
+        from Order o 
+        join User u on o.user.id = u.id
+        where u.deleted = false 
+    """)
+    fun findAllByUserId(userId: Long): List<Order>
+
+    @Query("""
+        select distinct 
+        o.user.username as username,
+        o.totalAmount as totalAmount,
+        o.status as status
+        from Order o
+        join User u on o.user.id = u.id
+        where o.user.id = ?1 and o.id = ?2
+    """)
+    fun findByUserIdAndIdProjection(userId: Long, orderId: Long): OrderInfoResponseProjection?
+
+    fun findByUserIdAndId(userId: Long, orderId: Long): Order?
+
+    @Query("""
+        select count(o.totalAmount) as counts,
+        sum(o.totalAmount) as totalAmountMonthly
+        from Order o
+        join User u on o.user.id = u.id
+        where o.user.id = ?1 and EXTRACT(month from o.createdDate) = ?2
+    """)
+    fun findUserMonthlyOrdered(userId: Long, month: Byte): OrderCountMonthlyProjection?
 }
 
 @Repository
-interface OrderItemRepository : BaseRepository<OrderItem>{}
+interface OrderItemRepository : BaseRepository<OrderItem>{
+
+    fun findAllByOrderId(orderId: Long): List<OrderItem>
+}
 
 @Repository
-interface PaymentRepository : BaseRepository<Payment> {}
+interface PaymentRepository : BaseRepository<Payment> {
+
+    fun findByUserIdAndDeletedFalse(userId: Long): List<Payment>?
+}
