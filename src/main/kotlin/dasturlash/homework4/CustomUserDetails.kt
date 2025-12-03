@@ -8,12 +8,12 @@ class CustomUserDetails(
     private val user: User
 ) : UserDetails{
     override fun getAuthorities(): Collection<GrantedAuthority?> {
-        return listOf(SimpleGrantedAuthority(role.name))
+        return listOf(SimpleGrantedAuthority(role?.name))
     }
 
-    override fun getPassword(): String = user.password
+    override fun getPassword(): String? = user.password
 
-    override fun getUsername(): String = user.username
+    override fun getUsername(): String? = user.username
 
     override fun isAccountNonExpired(): Boolean = true
 
@@ -25,16 +25,16 @@ class CustomUserDetails(
 
     fun getUser(): User = user
 
-    val status: UserStatus
+    val status: UserStatus?
         get() = user.status
 
-    val role: UserRole
+    val role: UserRole?
         get() = user.role
 
     val id: Long?
         get() = user.id
 
-    val fullname: String
+    val fullname: String?
         get() = user.fullname
 
 

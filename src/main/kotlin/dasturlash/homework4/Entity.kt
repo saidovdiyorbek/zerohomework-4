@@ -40,13 +40,13 @@ class BaseEntity(
 @Entity
 @Table(name = "users")
 class User(
-    var username: String,
-    var fullname: String,
-    var email: String,
-    var password: String,
-    var address: String,
-    @Enumerated(EnumType.STRING) var role: UserRole,
-    @Enumerated(EnumType.STRING) var status: UserStatus,
+    var username: String? = null,
+    var fullname: String? = null,
+    var email: String? = null,
+    var password: String? = null,
+    var address: String? = null,
+    @Enumerated(EnumType.STRING) var role: UserRole? = null,
+    @Enumerated(EnumType.STRING) var status: UserStatus? = null,
 ): BaseEntity()
 
 @Entity

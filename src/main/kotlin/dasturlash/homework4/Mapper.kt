@@ -105,7 +105,7 @@ class  OrderItemMapper(){
 
 @Component
 class OrderMapper(){
-    fun toOrderResponse(body: Order, username: String): OrderResponse {
+    fun toOrderResponse(body: Order, username: String?): OrderResponse {
         body.run {
             return OrderResponse(
                 username = username,

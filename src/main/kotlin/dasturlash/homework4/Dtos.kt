@@ -30,11 +30,11 @@ data class UserFullInfoAdmin(
     var createdBy: String? = null,
     var lastModifiedBy: String? = null,
     var deleted: Boolean? = null,
-    var username: String,
-    var fullname: String,
-    var email: String,
-    var address: String,
-    var role: UserRole,
+    var username: String?,
+    var fullname: String?,
+    var email: String?,
+    var address: String?,
+    var role: UserRole?,
     )
 
 data class UpdateUserRequest(
@@ -143,7 +143,7 @@ class OrderStatusBody(
 )
 
 class OrderResponse(
-    val username: String,
+    val username: String?,
     val totalAmount: BigDecimal,
 )
 
