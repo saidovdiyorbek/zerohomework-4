@@ -94,7 +94,7 @@ class  OrderItemMapper(){
         body.run {
             return OrderItemInfoResponse(
                 order?.id,
-                product.id,
+                product?.id,
                 quantity,
                 unitPrice,
                 totalAmount

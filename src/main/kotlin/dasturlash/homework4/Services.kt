@@ -267,7 +267,7 @@ class OrderServiceImpl(
 
             val product = productRepository.findByIdAndDeletedFalse(item.productId)
                     ?: throw ProductNotFoundException()
-            val itemAmountTotalForOrder = product.price.multiply(BigDecimal(item.quantity))
+            val itemAmountTotalForOrder = product.price?.multiply(BigDecimal(item.quantity))
             calculatedTotalAmountForOrder = calculatedTotalAmountForOrder.add(itemAmountTotalForOrder)
             forCount++
 
@@ -282,7 +282,7 @@ class OrderServiceImpl(
             if (create){
                 orderRequest.orderItems.forEach { item ->
                     val productForPrice = productRepository.findById(item.productId).get()
-                    val itemAmountTotal = productForPrice.price.multiply(BigDecimal(item.quantity))
+                    val itemAmountTotal = productForPrice.price?.multiply(BigDecimal(item.quantity))
 
                     orderItemsCreation.add(OrderItem(
                         order = saveOrder,
@@ -397,7 +397,7 @@ class PaymentServiceImpl(
         findPayments?.forEach { payment ->
             responses.add(PaymentResponse(
                 orderId = payment.order?.id,
-                userId = payment.user.id,
+                userId = payment.user?.id,
                 amount = payment.amount,
             ))
         }

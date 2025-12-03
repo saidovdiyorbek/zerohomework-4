@@ -63,40 +63,40 @@ class Order(
 class Payment(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
-    var order: Order?,
+    var order: Order?=null,
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    var user: User,
+    var user: User?=null,
     @Enumerated(EnumType.STRING) var paymentMethod: PaymentMethod,
-    var amount: BigDecimal,
+    var amount: BigDecimal?=null,
 ): BaseEntity()
 
 @Entity
 class Category(
-    var name: String,
-    var description: String,
+    var name: String?=null,
+    var description: String?=null,
 ) : BaseEntity()
 
 @Entity
 class Product(
-    var name: String,
-    var description: String,
-    var price: BigDecimal,
-    var stockCount: Int,
+    var name: String? = null,
+    var description: String? = null,
+    var price: BigDecimal? = null,
+    var stockCount: Int? = null,
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
-    var category: Category,
+    var category: Category? = null,
 ) : BaseEntity()
 
 @Entity
 class OrderItem(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
-    var order: Order?,
+    var order: Order?=null,
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
-    var product: Product,
-    var quantity: Int,
-    var unitPrice: BigDecimal,
-    var totalAmount: BigDecimal,
+    var product: Product?=null,
+    var quantity: Int?=null,
+    var unitPrice: BigDecimal?=null,
+    var totalAmount: BigDecimal?=null,
 ) : BaseEntity()

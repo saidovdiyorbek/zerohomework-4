@@ -133,9 +133,9 @@ data class OrderInfoResponse(
 data class OrderItemInfoResponse(
     val orderId: Long?,
     val productId: Long?,
-    val quantity: Int,
-    val unitPrice: BigDecimal,
-    val totalAmount: BigDecimal,
+    val quantity: Int?,
+    val unitPrice: BigDecimal?,
+    val totalAmount: BigDecimal?,
 )
 
 class OrderStatusBody(
@@ -150,7 +150,7 @@ class OrderResponse(
 class PaymentResponse(
     val orderId: Long?,
     val userId: Long?,
-    val amount: BigDecimal,
+    val amount: BigDecimal?,
 )
 class OrderCountUser(
     val counts: Int?,

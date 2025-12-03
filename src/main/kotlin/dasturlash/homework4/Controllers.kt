@@ -1,6 +1,7 @@
 package dasturlash.homework4
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -60,6 +61,7 @@ class UserController(
 //category controller
 @RestController
 @RequestMapping("/api/category")
+@SecurityRequirement(name = "basicAuth")
 class CategoryController(
     private val categoryService: CategoryService
 ){
@@ -87,6 +89,7 @@ class CategoryController(
 
 @RestController
 @RequestMapping("/api/products")
+@SecurityRequirement(name = "basicAuth")
 class ProductController(
     private val productService: ProductService
 ){
@@ -114,6 +117,7 @@ class ProductController(
 
 @RestController
 @RequestMapping("/api/orders")
+@SecurityRequirement(name = "basicAuth")
 class OrderController(
     private val orderService: OrderService
 ){
@@ -152,6 +156,7 @@ class OrderController(
 
 @RestController
 @RequestMapping("/api/payments")
+@SecurityRequirement(name = "basicAuth")
 class PaymentController(
     private val service: PaymentService,
 ){
